@@ -1,24 +1,24 @@
 import os
 import telebot
 
-# Отримуємо токен із змінних середовища (Railway Variables)
+# Діагностика: виведемо всі змінні оточення
+print("🔍 Усі змінні оточення:")
+for key, value in os.environ.items():
+    if "TOKEN" in key:  # тільки ті, що пов'язані з токенами
+        print(f"{key} = {value}")
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 if not BOT_TOKEN:
     raise ValueError("❌ Не знайдено токен! Додай змінну BOT_TOKEN у Railway.")
 
+print(f"✅ BOT_TOKEN успішно зчитано: {BOT_TOKEN[:10]}...")
+
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Команда /start
-@bot.message_handler(commands=['start'])
-def start_message(message):
-    bot.reply_to(message, "✅ Бот запущений і працює на Railway!")
+@bot.message_handler(commands=["start"])
+def start(message):
+    bot.reply_to(message, "👋 Привіт! Бот працює.")
 
-# Команда /help
-@bot.message_handler(commands=['help'])
-def help_message(message):
-    bot.reply_to(message, "ℹ️ Доступні команди:\n/start - перевірка роботи\n/help - список команд")
-
-print("🚀 Бот стартує...")
-
+print("🚀 Бот запущено...")
 bot.polling(none_stop=True)
