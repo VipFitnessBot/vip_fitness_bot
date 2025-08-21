@@ -9,6 +9,6 @@ bot = telebot.TeleBot(BOT_TOKEN)
 def start(message):
     bot.reply_to(message, "Вітаю у VIP Fitness Bot!")
 
-if name == "__main__":
+if __name__ == "__main__":
     print("Бот запущено...")
     bot.infinity_polling()
