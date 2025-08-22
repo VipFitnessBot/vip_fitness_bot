@@ -1,78 +1,83 @@
 import telebot
-import json
-import os
+from config import TOKEN
 
-# === Налаштування ===
-BOT_TOKEN = "7717901847:AAHytaN_hObl-6G8IB43r8qhRSZ7svnO6gM"  # ВСТАВ СЮДИ СВІЙ ТОКЕН
-ADMIN_ID = 430950918  # твій Telegram ID
-DATA_FILE = "users.json"
+bot = telebot.TeleBot(TOKEN)
 
-# === Ініціалізація ===
-bot = telebot.TeleBot(BOT_TOKEN)
+# Словник користувачів {id: {"level": int, "active": bool}}
+users = {}
 
-# === Завантаження даних ===
-def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {}
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+# Опис бонусів
+bonuses = {
+    2: "☕ 1 кава (можна обміняти)",
+    3: "☕☕ 2 кави (можна обміняти)",
+    4: "🥤 Протеїновий коктейль (можна обміняти)",
+    5: "☕ + 🥤 кава і протеїновий коктейль (можна обміняти)",
+    6: "☕☕ + 🥤 2 кави і протеїновий коктейль (можна обміняти)",
+}
 
-# === Збереження даних ===
-def save_data(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+discounts = {
+    1: "0-2 місяці ➝ -20%",
+    2: "2-4 місяці ➝ -25%",
+    3: "4-6 місяців ➝ -30%",
+    4: "6-8 місяців ➝ -35%",
+    5: "8-10 місяців ➝ -40%",
+    6: "12+ місяців ➝ -45%",
+}
 
-users = load_data()
-
-# === Отримати рівень користувача ===
-def get_level(user_id):
-    return users.get(str(user_id), 1)
-
-# === Встановити рівень ===
-def set_level(user_id, level):
-    users[str(user_id)] = level
-    save_data(users)
-
-# === Текст бонусів ===
-def get_bonus_text(level):
-    bonuses = {
-        2: "☕ Кава",
-        3: "☕☕ Дві кави",
-        4: "🥤 Протеїновий коктейль",
-        5: "☕ + 🥤 Кава + протеїновий коктейль",
-        6: "☕☕ + 🥤 Дві кави + протеїновий коктейль"
-    }
-    return bonuses.get(level, "Поки бонусів немає 🙂") + "\nБонуси можна обміняти на інші товари у схожому ціновому діапазоні."
-
-# === Команда старт ===
+# Стартова команда
 @bot.message_handler(commands=["start"])
 def start(message):
-    level = get_level(message.from_user.id)
-    text = f"Привіт, {message.from_user.first_name}!\nТвій рівень у VIP клубі: {level}\n{get_bonus_text(level)}"
+    user_id = message.chat.id
+    if user_id not in users:
+        users[user_id] = {"level": 1, "active": True}
+    bot.send_message(user_id, "👋 Вітаю у VIP Fitness Club!
+"
+                              "Ви отримуєте знижки та бонуси за підписку.
+"
+                              "Використовуйте меню нижче.")
+
+# Меню
+@bot.message_handler(commands=["menu"])
+def menu(message):
+    user_id = message.chat.id
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("💳 Мій рівень", "🎁 Бонуси")
+    markup.add("📉 Знижки", "💰 Оплатити підписку")
+    bot.send_message(user_id, "Оберіть опцію:", reply_markup=markup)
+
+# Мій рівень
+@bot.message_handler(func=lambda m: m.text == "💳 Мій рівень")
+def my_level(message):
+    user_id = message.chat.id
+    level = users[user_id]["level"]
+    bot.send_message(user_id, f"Ваш рівень: {level}
+Знижка: {discounts.get(level, 'Немає')}")
+
+# Бонуси
+@bot.message_handler(func=lambda m: m.text == "🎁 Бонуси")
+def my_bonuses(message):
+    user_id = message.chat.id
+    level = users[user_id]["level"]
+    text = bonuses.get(level, "Бонусів поки немає.")
+    bot.send_message(user_id, f"Ваші бонуси: {text}")
+
+# Знижки
+@bot.message_handler(func=lambda m: m.text == "📉 Знижки")
+def discount_list(message):
+    text = "📉 Система знижок:
+
+"
+    for k, v in discounts.items():
+        text += f"{v}
+"
     bot.send_message(message.chat.id, text)
 
-# === Команда перевірки рівня ===
-@bot.message_handler(commands=["myvip"])
-def my_vip(message):
-    level = get_level(message.from_user.id)
-    text = f"Твій рівень: {level}\n{get_bonus_text(level)}"
-    bot.send_message(message.chat.id, text)
+# Оплата (заглушка WayForPay)
+@bot.message_handler(func=lambda m: m.text == "💰 Оплатити підписку")
+def pay(message):
+    bot.send_message(message.chat.id, "💳 Оплата через WayForPay поки у розробці.
+"
+                                      "Тут буде кнопка для онлайн-оплати.")
 
-# === Адмін: встановити рівень ===
-@bot.message_handler(commands=["setlevel"])
-def setlevel(message):
-    if message.from_user.id != ADMIN_ID:
-        bot.send_message(message.chat.id, "⛔ У вас немає доступу до цієї команди.")
-        return
-
-    try:
-        _, user_id, level = message.text.split()
-        user_id = int(user_id)
-        level = int(level)
-        set_level(user_id, level)
-        bot.send_message(message.chat.id, f"✅ Рівень {level} встановлено користувачу {user_id}")
-    except:
-        bot.send_message(message.chat.id, "❌ Формат: /setlevel USER_ID LEVEL")
-
-print("Бот запущений...")
-bot.infinity_polling()
+print("Бот запущено...")
+bot.polling(none_stop=True)
