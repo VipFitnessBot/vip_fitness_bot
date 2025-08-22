@@ -1,7 +1,10 @@
 import telebot
-from config import TOKEN
+from telebot import types
+import datetime
 
-bot = telebot.TeleBot(TOKEN)
+# 🔑 Токен вставляєш СЮДИ (в лапках!)
+BOT_TOKEN = "7717901847:AAHytaN_hObl-6G8IB43r8qhRSZ7svnO6gM"
+bot = telebot.TeleBot(BOT_TOKEN)
 
 # 🗂 Тут буде зберігатися інформація про користувачів (для тесту — у пам'яті)
 users = {}
