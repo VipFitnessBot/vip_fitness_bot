@@ -1,10 +1,16 @@
+import os
 
-# Опціонально: можна задати ці значення через Railway Variables замість редагування файлу.
+# Читаємо токен з token.txt
+def load_token():
+    try:
+        with open("token.txt", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        raise ValueError("Файл token.txt не знайдено! Створи його та встав токен.")
 
-BOT_TOKEN      = "7717901847:AAHytaN_hObl-6G8IB43r8qhRSZ7svnO6gM"  # або залиш порожнім і створи файл token.txt
-WFP_MERCHANT   = "www_instagram_com_84d14"  # merchantAccount з WayForPay
-WFP_SECRET     = "23434a4fff7cd0e1b1b2f928ffa41d40370bc4b1"  # SecretKey з WayForPay
-PUBLIC_URL     = "https://web-production-ee6a9.up.railway.app"  # https://<app>.up.railway.app
-BOT_USERNAME   = ""  # юзернейм бота без @
-WFP_RETURN_URL = ""  # наприклад https://t.me/<твій_бот>
-SUBSCRIPTION_AMOUNT = 100
+BOT_TOKEN = load_token()
+
+# Дані WayForPay (поки що заглушки, заміниш своїми)
+WFP_MERCHANT = os.getenv("WFP_MERCHANT", "demo")
+WFP_SECRET = os.getenv("WFP_SECRET", "demo_secret")
+WFP_URL = os.getenv("WFP_URL", "https://demo.wayforpay.com")
