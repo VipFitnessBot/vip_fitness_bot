@@ -3,13 +3,11 @@ import asyncio
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackContext
 
-# ЛОГІНГ
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
-# === ЧИТАЄМО ТОКЕН З token.txt ===
 def get_token():
     try:
         with open("token.txt", "r") as f:
@@ -19,10 +17,8 @@ def get_token():
 
 TOKEN = get_token()
 
-# Дані користувачів (для тесту зберігаються в пам’яті)
 users = {}
 
-# Рівні знижок
 discount_levels = {
     1: 20,
     2: 25,
@@ -32,7 +28,6 @@ discount_levels = {
     6: 45
 }
 
-# Рівні бонусів
 bonus_levels = {
     1: "Кава",
     2: "2 кави",
@@ -42,7 +37,6 @@ bonus_levels = {
     6: "Максимальний пакет бонусів"
 }
 
-# === /start ===
 async def start(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
     if user_id not in users:
@@ -53,20 +47,17 @@ async def start(update: Update, context: CallbackContext):
         "Вітаю у VIP-клубі! 🎉\nОбери дію:", reply_markup=reply_markup
     )
 
-# === показати рівень ===
 async def my_level(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
     level = users.get(user_id, {"level": 0})["level"]
     await update.message.reply_text(f"Твій рівень: {level}")
 
-# === показати знижки ===
 async def discounts(update: Update, context: CallbackContext):
     text = "📉 Система знижок:\n"
     for lvl, disc in discount_levels.items():
         text += f"{lvl}-й рівень → {disc}%\n"
     await update.message.reply_text(text)
 
-# === показати бонуси ===
 async def bonuses(update: Update, context: CallbackContext):
     text = "🎁 Система бонусів:\n"
     for lvl, bonus in bonus_levels.items():
@@ -74,7 +65,6 @@ async def bonuses(update: Update, context: CallbackContext):
     text += "\nБонуси можна обміняти на інші товари в подібному ціновому діапазоні."
     await update.message.reply_text(text)
 
-# === імітація оплати ===
 async def pay(update: Update, context: CallbackContext):
     user_id = update.effective_user.id
     if user_id not in users:
@@ -83,7 +73,6 @@ async def pay(update: Update, context: CallbackContext):
     users[user_id]["payments"] += 1
     payments = users[user_id]["payments"]
 
-    # Розрахунок рівня
     if payments >= 6:
         users[user_id]["level"] = 6
     else:
@@ -93,7 +82,6 @@ async def pay(update: Update, context: CallbackContext):
         f"✅ Оплата прийнята!\nТепер твій рівень: {users[user_id]['level']}"
     )
 
-# === ГОЛОВНА ФУНКЦІЯ ===
 async def main():
     application = Application.builder().token(TOKEN).build()
 
@@ -105,7 +93,6 @@ async def main():
 
     await application.run_polling()
 
-# === БЕЗПЕЧНИЙ СТАРТ ===
 if __name__ == "__main__":
     try:
         asyncio.run(main())
