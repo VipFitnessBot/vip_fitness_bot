@@ -81,24 +81,18 @@ async def pay(update: Update, context: CallbackContext):
     await update.message.reply_text(
         f"✅ Оплата прийнята!\nТепер твій рівень: {users[user_id]['level']}"
     )
+# --- обробники команд ---
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Вітаю у VIP-клубі! 🎉")
 
-async def main():
-    application = Application.builder().token(TOKEN).build()
+# --- Головний запуск ---
+def main():
+    application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("level", my_level))
-    application.add_handler(CommandHandler("discounts", discounts))
-    application.add_handler(CommandHandler("bonuses", bonuses))
-    application.add_handler(CommandHandler("pay", pay))
 
-    await application.run_polling()
+    # ⚡️ Використовуємо run_polling (він сам керує подіями, без asyncio.run)
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except RuntimeError as e:
-        if str(e).startswith("This event loop is already running"):
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(main())
-        else:
-            raise
+    main()
