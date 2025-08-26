@@ -1,29 +1,10 @@
-import os
 
-# === Telegram token з token.txt ===
-def load_token():
-    try:
-        with open("token.txt", "r", encoding="utf-8") as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        raise ValueError("Файл token.txt не знайдено! Додай його з токеном бота.")
+# Опціонально: можна задати ці значення через Railway Variables замість редагування файлу.
 
-BOT_TOKEN = load_token()
-
-# === WayForPay ===
-# Обов'язково задай ці змінні у Railway → Variables
-WFP_MERCHANT = os.getenv("WFP_MERCHANT", "")
-WFP_SECRET = os.getenv("WFP_SECRET", "")
-MERCHANT_DOMAIN = os.getenv("MERCHANT_DOMAIN", "example.com")
-
-# Публічний URL твого сервісу Railway без слеша в кінці
-PUBLIC_URL = os.getenv("PUBLIC_URL", "https://your-app.up.railway.app")
-
-# Сума підписки (грн)
-SUBSCRIPTION_AMOUNT = int(os.getenv("SUBSCRIPTION_AMOUNT", "100"))
-
-# Валюта
-CURRENCY = "UAH"
-
-# Файл з користувачами (проста JSON-пам'ять)
-USERS_FILE = "users.json"
+BOT_TOKEN      = "7717901847:AAHytaN_hObl-6G8IB43r8qhRSZ7svnO6gM"  # або залиш порожнім і створи файл token.txt
+WFP_MERCHANT   = "www_instagram_com_84d14"  # merchantAccount з WayForPay
+WFP_SECRET     = "23434a4fff7cd0e1b1b2f928ffa41d40370bc4b1"  # SecretKey з WayForPay
+PUBLIC_URL     = "https://web-production-ee6a9.up.railway.app"  # https://<app>.up.railway.app
+BOT_USERNAME   = "ParkovaFinness_Vip_bot"  # юзернейм бота без @
+WFP_RETURN_URL = ""  # наприклад https://t.me/<твій_бот>
+SUBSCRIPTION_AMOUNT = 100
